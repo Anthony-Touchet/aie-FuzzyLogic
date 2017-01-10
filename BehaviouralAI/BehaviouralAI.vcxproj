@@ -29,6 +29,7 @@
     <ClCompile Include="src\UtilitySystemApplication.cpp" />
     <ClCompile Include="src\UtilityValue.cpp" />
     <ClCompile Include="src\World.cpp" />
+    <ClCompile Include="UtilityNPC.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\BaseApplication.h" />
@@ -41,6 +42,7 @@
     <ClInclude Include="src\UtilitySystemApplication.h" />
     <ClInclude Include="src\UtilityValue.h" />
     <ClInclude Include="src\World.h" />
+    <ClInclude Include="UtilityNPC.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{63494F4E-79FA-48AD-AA6C-BDF1FF1619FD}</ProjectGuid>
@@ -124,6 +126,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>opengl32.lib;glfw3.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)dep\glfw-3.1.2\src\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
