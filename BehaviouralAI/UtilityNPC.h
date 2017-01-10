@@ -20,5 +20,6 @@ private:
 	UtilityValue m_logValue;
 	UtilityValue m_buildValue;
 
-	std::map<std::string, UtilityScore*> m_pUtilityScoreMap;
+	std::map<std::string, UtilityScore*> m_pUtilityScoreMap;
+
 };

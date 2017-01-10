@@ -40,6 +40,11 @@ Cave::Cave(glm::vec2 position):BaseResource(position,glm::vec4(0,0,0,1),20)
 	type = CAVE;
 }
 
+Predator::Predator(glm::vec2 position) : BaseResource(position, glm::vec4(1, 0, 0, 1), 20)
+{
+	type = PREDATOR;
+}
+
 Agent::Agent(glm::vec2 position) : BaseAgent(position, glm::vec4(1, 1, 0, 1), 20)
 {
 	tiredness = 1;
@@ -144,9 +149,9 @@ float Agent::checkEatingDesirable()
 	float foodRangeMedium = fuzzyEngine.mediumRange->getMembership(foodRange);
 	float foodRangeFar = fuzzyEngine.farAway->getMembership(foodRange);
 	//is this a very desirable action?
-	float veryDesirableValue = Fuzzy::OR(Fuzzy::AND(foodRangeClose,hungry),veryHungry);
+	float veryDesirableValue = Fuzzy::OR(Fuzzy::AND(foodRangeClose, hungry), veryHungry);
 	//is it a desirable action?
-	float desirableValue = Fuzzy::AND(Fuzzy::NOT(foodRangeFar),hungry);
+	float desirableValue = Fuzzy::OR(Fuzzy::NOT(foodRangeFar), hungry);
 	//is in undesirable?  In this case if we are full it's undesirable
 	float undesirableValue = full;
 	//set up our maximum values ready to defuzzify
@@ -231,6 +236,32 @@ float Agent::checkDrinkingDesirable()
 
 }
 
+float Agent::checkFleeDesirability()
+{
+	float desire = 0; //this is the return value which will be how much
+					  //our AI desires To avoid Predator
+	float predatorRange = findNearestResource(PREDATOR);
+
+	float predatorRangeClose = fuzzyEngine.veryNear->getMembership(predatorRange);
+	float predatorRangeMedium = fuzzyEngine.mediumRange->getMembership(predatorRange);
+	float predatorRangeFar = fuzzyEngine.farAway->getMembership(predatorRange);
+	//is this a very desirable action?
+	float veryDesirableValue = predatorRangeClose;
+	//is it a desirable action?
+	float desirableValue = predatorRangeMedium;
+	//is in undesirable?  In this case if we are full it's undesirable
+	float undesirableValue = predatorRangeFar;
+	//set up our maximum values readt to defuzzify
+	float maxVeryDesirable = fuzzyEngine.veryDesirable->getMaxMembership();
+	float maxDesirable = fuzzyEngine.desirable->getMaxMembership();
+	float maxUndesirable = fuzzyEngine.undesirable->getMaxMembership();
+	//defuzzify
+	desire = maxVeryDesirable*veryDesirableValue + maxDesirable* desirableValue + maxUndesirable*undesirableValue;
+	desire /= (.1f + veryDesirableValue + desirableValue + undesirableValue);
+	//return our final desire
+	return desire;
+}
+
 glm::vec2 Agent::gotoFood(float desirability, float delta)
 {
 	glm::vec2 velocity = findResourceVector(FOOD) * delta * (1+desirability)*maxSpeed;
@@ -249,11 +280,18 @@ glm::vec2 Agent::gotoWater(float desirability, float delta)
 	return velocity;
 }
 
+glm::vec2 Agent::fleePredator(float desirability, float delta)
+{
+	glm::vec2 velocity = -glm::normalize(findResourceVector(PREDATOR) - this->position) * delta * (1 + desirability) * maxSpeed;
+	return velocity;
+}
+
 void Agent::update(float delta)
 {
 	float eatDesirability = checkEatingDesirable();
 	float sleepDesirability = checkSleepDesirable();
 	float drinkDesirability = checkDrinkingDesirable();
+	float fleeDesirability = checkFleeDesirability();
 	glm::vec2 velocity;
 	if(eatDesirability>sleepDesirability && eatDesirability>drinkDesirability)
 	{
@@ -267,6 +305,10 @@ void Agent::update(float delta)
 	{
 		velocity = gotoWater(drinkDesirability,delta);
 	}
+
+	if(fleeDesirability > 0.15f)
+		velocity += fleePredator(fleeDesirability, delta);
+
 	position += velocity;
 	//if we are near water then drink
 	if(findNearestResource(WATER) <2)
@@ -331,6 +373,20 @@ void WorldController::update(float delta)
 {
 	for(auto worldObject:worldObjects)
 	{
+		if(worldObject->type == PREDATOR)
+		{
+			WorldObject* agent;
+			for(auto wO:worldObjects)
+			{
+				if(wO->type == SIMPLE_AI)
+				{
+					agent = wO;
+					break;
+				}
+			}
+
+			worldObject->position += 1.0f * glm::normalize(agent->position - worldObject->position);
+		}
 		worldObject->update(delta);
 	}
 }

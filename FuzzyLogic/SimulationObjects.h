@@ -8,6 +8,7 @@ enum WorldObjectType
 	WATER,
 	FOOD,
 	CAVE,
+	PREDATOR,
 };
 
 using namespace std;
@@ -51,6 +52,12 @@ class Cave:public BaseResource
 	Cave(glm::vec2 position);
 };
 
+class Predator : public BaseResource
+{
+public:
+	Predator(glm::vec2 position);
+};
+
 class BaseAgent:public WorldObject
 {
 public:
@@ -73,9 +80,11 @@ public:
 	float checkEatingDesirable();
 	float checkSleepDesirable();
 	float checkDrinkingDesirable();
+	float checkFleeDesirability();
 	glm::vec2 gotoFood(float desirability,float delta);
 	glm::vec2 gotoCave(float desirability,float delta);
 	glm::vec2 gotoWater(float desirability,float delta);
+	glm::vec2 fleePredator(float desirability, float delta);
 };
 
 class WorldController

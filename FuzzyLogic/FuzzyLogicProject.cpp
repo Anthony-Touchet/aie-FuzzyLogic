@@ -53,6 +53,8 @@ void FuzzyProject::FuzzyLogicExample()
 	worldController->addObject(cave);
 	Food* food = new Food(glm::vec2(300, 600));
 	worldController->addObject(food);
+	Predator* predator = new Predator(glm::vec2(500, 200));
+	worldController->addObject(predator);
 
 	//the following code sets up all the membership functions for the fuzzy sets
 
